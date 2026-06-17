@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monitoramento IFP — SENAI/MS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --blue:      #003DA5;
+      --blue-mid:  #1A5BCC;
+      --blue-lite: #EEF3FC;
+      --accent:    #F5A623;
+      --danger:    #D93025;
+      --success:   #1E8C45;
+      --bg:        #F0F4FB;
+      --card:      #FFFFFF;
+      --border:    #D6E0F0;
+      --text:      #111827;
+      --muted:     #6B7A99;
+      --radius:    10px;
+      --shadow:    0 2px 12px rgba(0,61,165,.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+    /* HEADER */
+    .site-header {
+      background: var(--blue); height: 54px; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.22);
+    }
+    .header-brand { display: flex; align-items: center; gap: 10px; color: #fff; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; }
+    .header-brand span { opacity: .55; font-weight: 400; }
+    .header-badge { background: rgba(255,255,255,.15); color: #fff; font-size: 11px; font-weight: 700; padding: 3px 11px; border-radius: 20px; letter-spacing: .06em; }
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg, var(--blue) 0%, var(--blue-mid) 100%); padding: 32px 24px 28px; color: #fff; }
+    .hero-inner { max-width: 820px; margin: 0 auto; }
+    .hero-kicker { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; opacity: .65; margin-bottom: 5px; }
+    .hero-title  { font-family: 'Sora', sans-serif; font-size: clamp(20px,4vw,30px); font-weight: 700; line-height: 1.2; margin-bottom: 5px; }
+    .hero-sub    { font-size: 13px; opacity: .7; }
+    .hero-meta   { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .hero-tag    { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.18); border-radius: 20px; padding: 4px 12px; font-size: 12px; }
+    .progress-wrap { height: 4px; background: rgba(255,255,255,.2); border-radius: 2px; margin-top: 16px; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width .4s ease; }
+
+    /* STEP NAV */
+    .step-nav { background: var(--card); border-bottom: 1px solid var(--border); display: flex; overflow-x: auto; }
+    .step-nav::-webkit-scrollbar { display: none; }
+    .step-btn {
+      flex-shrink: 0; padding: 13px 18px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      color: var(--muted); background: none; border: none; cursor: pointer;
+      border-bottom: 3px solid transparent; transition: .18s ease;
+      display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    }
+    .step-btn:hover   { color: var(--blue); background: rgba(0,61,165,.03); }
+    .step-btn.active  { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+    .step-btn.done    { color: var(--success); }
+    .step-btn .num    { width: 20px; height: 20px; border-radius: 50%; background: var(--border); color: var(--muted); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .step-btn.active .num { background: var(--blue); color: #fff; }
+    .step-btn.done   .num { background: var(--success); color: #fff; }
+
+    /* MAIN */
+    .main { max-width: 820px; margin: 0 auto; padding: 24px 16px 60px; }
+
+    /* CARD */
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 18px; overflow: hidden; }
+    .card-header { padding: 15px 20px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+    .card-icon { width: 32px; height: 32px; background: var(--blue-lite); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+    .card-title { font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; }
+    .card-sub   { font-size: 12px; color: var(--muted); margin-top: 1px; }
+    .card-body  { padding: 20px; }
+
+    /* GRID */
+    .fgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .full  { grid-column: 1 / -1; }
+    @media (max-width: 580px) { .fgrid { grid-template-columns: 1fr; } .full { grid-column: 1; } }
+
+    /* FIELDS */
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+    .field label .req { color: var(--danger); margin-left: 2px; }
+    input[type=text], input[type=email], input[type=tel], select, textarea {
+      width: 100%; padding: 9px 12px;
+      border: 1.5px solid var(--border); border-radius: 7px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+      background: #fff; transition: border-color .15s, box-shadow .15s; appearance: none;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,61,165,.10); }
+    input::placeholder, textarea::placeholder { color: #C0CCDE; }
+    textarea { resize: vertical; min-height: 72px; }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7A99' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px;
+    }
+
+    /* RADIO / CHECK GROUP */
+    .opt-group { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+    .opt-item  { display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: .15s ease; }
+    .opt-item:hover { border-color: var(--blue); background: var(--blue-lite); }
+    .opt-item input { margin-top: 1px; accent-color: var(--blue); flex-shrink: 0; }
+    .opt-item span  { font-size: 13px; line-height: 1.4; }
+    .opt-item.selected { border-color: var(--blue); background: var(--blue-lite); }
+
+    /* CHECKBOX MULTI */
+    .check-search { width: 100%; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 7px; font-size: 13px; margin-bottom: 8px; }
+    .check-search:focus { outline: none; border-color: var(--blue); }
+    .check-list { max-height: 240px; overflow-y: auto; border: 1.5px solid var(--border); border-radius: 8px; }
+    .check-list::-webkit-scrollbar { width: 6px; }
+    .check-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .12s; font-size: 13px; }
+    .check-item:last-child { border-bottom: none; }
+    .check-item:hover { background: var(--blue-lite); }
+    .check-item input { accent-color: var(--blue); flex-shrink: 0; }
+    .check-all-row { padding: 7px 12px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; }
+    .check-all-btn { font-size: 11px; font-weight: 600; color: var(--blue); background: none; border: none; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+    .check-all-btn:hover { background: var(--blue-lite); }
+
+    /* UPLOAD */
+    .upload-drop { border: 2px dashed var(--border); border-radius: var(--radius); padding: 24px; text-align: center; cursor: pointer; transition: .15s; background: #F8FAFD; }
+    .upload-drop:hover { border-color: var(--blue); background: var(--blue-lite); }
+    .upload-drop .ico { font-size: 28px; margin-bottom: 6px; }
+    .upload-drop p   { font-size: 13px; color: var(--muted); }
+    .upload-drop small { font-size: 11px; color: #C0CCDE; display: block; margin-top: 3px; }
+    .upload-info { margin-top: 10px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--blue-lite); border-radius: 7px; border: 1px solid var(--border); font-size: 13px; }
+    .upload-info button { margin-left: auto; background: none; border: none; cursor: pointer; color: var(--danger); font-size: 15px; }
+
+    /* SECTION DIVIDER */
+    .divider { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 18px 0 12px; display: flex; align-items: center; gap: 8px; }
+    .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* BUTTONS */
+    .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 18px; border-radius: 7px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: .18s ease; }
+    .btn-ghost   { background: none; border: 1.5px solid var(--border); color: var(--muted); }
+    .btn-ghost:hover { border-color: var(--blue); color: var(--blue); }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-primary:hover { background: var(--blue-mid); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,61,165,.25); }
+    .btn-submit  { background: linear-gradient(135deg, var(--blue), var(--blue-mid)); color: #fff; padding: 11px 26px; font-size: 14px; }
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,61,165,.3); }
+    .btn:disabled { opacity: .5; pointer-events: none; }
+
+    /* REVIEW TABLE */
+    .review-section { margin-bottom: 22px; }
+    .review-section h3 { font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; color: var(--blue); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+    .review-row { display: flex; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--bg); font-size: 13px; }
+    .review-row:last-child { border-bottom: none; }
+    .review-label { color: var(--muted); font-weight: 500; min-width: 200px; flex-shrink: 0; }
+    .review-val   { color: var(--text); font-weight: 400; }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 22px; right: 22px; background: var(--text); color: #fff; padding: 11px 18px; border-radius: var(--radius); font-size: 13px; font-weight: 500; box-shadow: 0 8px 28px rgba(0,0,0,.22); z-index: 9999; transform: translateY(70px); opacity: 0; transition: .3s ease; max-width: 320px; }
+    #toast.show    { transform: translateY(0); opacity: 1; }
+    #toast.success { background: var(--success); }
+    #toast.error   { background: var(--danger); }
+
+    /* SPINNER */
+    .spin { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* PANELS */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* HIGHLIGHT required on submit */
+    .field-error input, .field-error select, .field-error textarea { border-color: var(--danger) !important; }
+    .field-error .check-list { border-color: var(--danger) !important; }
+    .err-msg { font-size: 11px; color: var(--danger); margin-top: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-brand">
+    <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect width="22" height="22" rx="4" fill="rgba(255,255,255,.15)"/><path d="M4 18V8l7-4 7 4v10H4z" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/><rect x="8" y="12" width="2" height="6" fill="rgba(255,255,255,.75)"/><rect x="12" y="12" width="2" height="6" fill="rgba(255,255,255,.75)"/></svg>
+    SENAI <span>/ MS</span>
+  </div>
+  <span class="header-badge">IFP 2026</span>
+</header>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <p class="hero-kicker">Unidade de Supervisão de Parcerias — USP/COEP/SUPRE</p>
+    <h1 class="hero-title">Monitoramento — Execução IFP</h1>
+    <p class="hero-sub">Itinerário Formativo Profissional · Rede Estadual de Ensino MS</p>
+    <div class="hero-meta">
+      <span class="hero-tag" id="hero-inst">🏭 SENAI-MS</span>
+      <span class="hero-tag" id="hero-step">📋 Etapa 1 de 5</span>
+      <span class="hero-tag" id="hero-modelo">📄 —</span>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-fill" id="prog" style="width:20%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STEP NAV ── -->
+<nav class="step-nav">
+  <button class="step-btn active" id="nav-1" onclick="goTo(1)"><span class="num">1</span> Identificação</button>
+  <button class="step-btn"        id="nav-2" onclick="goTo(2)"><span class="num">2</span> Exec. Pedagógica</button>
+  <button class="step-btn"        id="nav-3" onclick="goTo(3)"><span class="num">3</span> Documento Insumo</button>
+  <button class="step-btn"        id="nav-4" onclick="goTo(4)"><span class="num">4</span> Avaliação</button>
+  <button class="step-btn"        id="nav-5" onclick="goTo(5)"><span class="num">5</span> Conformidade Legal</button>
+  <button class="step-btn"        id="nav-6" onclick="goTo(6)"><span class="num">✓</span> Revisar e Enviar</button>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+<!-- ════════════════════════════════════════════════════════════
+     ETAPA 1 — IDENTIFICAÇÃO
+════════════════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-1">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🏢</div>
+      <div><div class="card-title">Identificação</div><div class="card-sub">Dados gerais da instituição e do coordenador</div></div>
+    </div>
+    <div class="card-body">
+      <div class="fgrid">
+
+        <div class="field full">
+          <label>Nome completo da instituição <span class="req">*</span></label>
+          <select id="i-inst" onchange="updateHero()">
+            <option value="">Selecione...</option>
+            <option>SENAI-Serviço Nacional de Aprendizagem Industrial</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label>Modelo de oferta / contrato <span class="req">*</span></label>
+          <div class="opt-group" id="i-modelo-group">
+            <label class="opt-item"><input type="radio" name="modelo" value="Itinerário Formativo Profissional" onchange="updateHero()"><span>Itinerário Formativo Profissional (IFP)</span></label>
+            <label class="opt-item"><input type="radio" name="modelo" value="Programa de Verticalização - PROVERT /MS" onchange="updateHero()"><span>Programa de Verticalização — PROVERT/MS</span></label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Contato WhatsApp — Coordenador pedagógico <span class="req">*</span></label>
+          <input type="tel" id="i-whats" placeholder="(67) 9 9999-9999" />
+        </div>
+
+        <div class="field">
+          <label>Nome do coordenador pedagógico <span class="req">*</span></label>
+          <input type="text" id="i-coord" placeholder="Nome completo" />
+        </div>
+
+        <div class="field full">
+          <label>E-mail do coordenador — ponto focal planilhas SED <span class="req">*</span></label>
+          <input type="email" id="i-email-focal" placeholder="coordenador@senai.br" />
+        </div>
+
+        <div class="field">
+          <label>Cidade de atuação em Educação Profissional <span class="req">*</span></label>
+          <select id="i-cidade">
+            <option value="">Selecione...</option>
+            <option>Água Clara</option><option>Alcinópolis</option><option>Amambai</option>
+            <option>Anastácio</option><option>Anaurilândia</option><option>Angélica</option>
+            <option>Antônio João</option><option>Aparecida do Taboado</option><option>Aquidauana</option>
+            <option>Aral Moreira</option><option>Bandeirantes</option><option>Bataguassu</option>
+            <option>Batayporã</option><option>Bela Vista</option><option>Bodoquena</option>
+            <option>Bonito</option><option>Brasilândia</option><option>Caarapó</option>
+            <option>Camapuã</option><option>Campo Grande</option><option>Caracol</option>
+            <option>Cassilândia</option><option>Chapadão do Sul</option><option>Corguinho</option>
+            <option>Coronel Sapucaia</option><option>Corumbá</option><option>Costa Rica</option>
+            <option>Coxim</option><option>Deodápolis</option><option>Dois Irmãos do Buriti</option>
+            <option>Douradina</option><option>Dourados</option><option>Eldorado</option>
+            <option>Fátima do Sul</option><option>Figueirão</option><option>Glória de Dourados</option>
+            <option>Guia Lopes da Laguna</option><option>Iguatemi</option><option>Inocência</option>
+            <option>Itaporã</option><option>Itaquiraí</option><option>Ivinhema</option>
+            <option>Japorã</option><option>Jaraguari</option><option>Jardim</option>
+            <option>Jateí</option><option>Juti</option><option>Ladário</option>
+            <option>Laguna Carapã</option><option>Maracaju</option><option>Miranda</option>
+            <option>Mundo Novo</option><option>Naviraí</option><option>Nioaque</option>
+            <option>Nova Alvorada do Sul</option><option>Nova Andradina</option>
+            <option>Novo Horizonte do Sul</option><option>Paraíso das Águas</option>
+            <option>Paranaíba</option><option>Paranhos</option><option>Pedro Gomes</option>
+            <option>Ponta Porã</option><option>Porto Murtinho</option><option>Ribas do Rio Pardo</option>
+            <option>Rio Brilhante</option><option>Rio Negro</option>
+            <option>Rio Verde de Mato Grosso</option><option>Rochedo</option>
+            <option>Santa Rita do Pardo</option><option>São Gabriel do Oeste</option>
+            <option>Selvíria</option><option>Sete Quedas</option><option>Sidrolândia</option>
+            <option>Sonora</option><option>Tacuru</option><option>Taquarussu</option>
+            <option>Terenos</option><option>Três Lagoas</option><option>Vicentina</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label>Unidades Escolares atendidas <span class="req">*</span></label>
+          <input type="text" class="check-search" placeholder="🔍 Buscar escola..." oninput="filterList('ees-list', this.value)" />
+          <div class="check-all-row">
+            <button class="check-all-btn" onclick="selectAll('ees-list', true)">Marcar todas</button>
+            <button class="check-all-btn" onclick="selectAll('ees-list', false)">Desmarcar todas</button>
+            <span id="ees-count" style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;">0 selecionadas</span>
+          </div>
+          <div class="check-list" id="ees-list"></div>
+        </div>
+
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="next(1)">Próximo: Execução Pedagógica →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ETAPA 2 — EXECUÇÃO PEDAGÓGICA
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-2">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📚</div>
+      <div><div class="card-title">Execução Pedagógica</div><div class="card-sub">Material didático, atividades práticas, visitas e insumos</div></div>
+    </div>
+    <div class="card-body">
+
+      <!-- Material didático -->
+      <div class="divider">Material Didático</div>
+      <div class="field full">
+        <label>Os materiais didáticos foram disponibilizados aos estudantes? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="material" value="Não foi disponibilizado material didático."><span>Não foi disponibilizado material didático.</span></label>
+          <label class="opt-item"><input type="radio" name="material" value="Já receberam material didático impresso."><span>Já receberam material didático impresso.</span></label>
+          <label class="opt-item"><input type="radio" name="material" value="Já receberam o material didático on-line."><span>Já receberam o material didático on-line.</span></label>
+          <label class="opt-item"><input type="radio" name="material" value="Já receberam o material didático impresso e on-line."><span>Já receberam material impresso e on-line.</span></label>
+        </div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <label>EEs que receberam material didático <span class="req">*</span></label>
+        <input type="text" class="check-search" placeholder="🔍 Buscar escola..." oninput="filterList('mat-list', this.value)" />
+        <div class="check-all-row">
+          <button class="check-all-btn" onclick="selectAll('mat-list', true)">Marcar todas</button>
+          <button class="check-all-btn" onclick="selectAll('mat-list', false)">Desmarcar todas</button>
+          <span id="mat-count" style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;">0 selecionadas</span>
+        </div>
+        <div class="check-list" id="mat-list"></div>
+      </div>
+
+      <!-- Atividades práticas -->
+      <div class="divider" style="margin-top:22px">Atividades Práticas</div>
+      <div class="field full">
+        <label>Foram realizadas atividades práticas (aulas de campo etc.)? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="praticas" value="SIM"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="praticas" value="NÃO"><span>Não</span></label>
+          <label class="opt-item"><input type="radio" name="praticas" value="PARCIALMENTE"><span>Parcialmente</span></label>
+        </div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <label>EEs que realizaram atividades práticas <span class="req">*</span></label>
+        <input type="text" class="check-search" placeholder="🔍 Buscar escola..." oninput="filterList('prat-list', this.value)" />
+        <div class="check-all-row">
+          <button class="check-all-btn" onclick="selectAll('prat-list', true)">Marcar todas</button>
+          <button class="check-all-btn" onclick="selectAll('prat-list', false)">Desmarcar todas</button>
+          <span id="prat-count" style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;">0 selecionadas</span>
+        </div>
+        <div class="check-list" id="prat-list"></div>
+      </div>
+
+      <!-- Visita técnica -->
+      <div class="divider" style="margin-top:22px">Visita Técnica</div>
+      <div class="field full">
+        <label>Foi realizada visita técnica durante o bimestre avaliado? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="visita" value="Sim"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="visita" value="Não"><span>Não</span></label>
+        </div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <label>EEs que realizaram visitas técnicas <span class="req">*</span></label>
+        <input type="text" class="check-search" placeholder="🔍 Buscar escola..." oninput="filterList('vis-list', this.value)" />
+        <div class="check-all-row">
+          <button class="check-all-btn" onclick="selectAll('vis-list', true)">Marcar todas</button>
+          <button class="check-all-btn" onclick="selectAll('vis-list', false)">Desmarcar todas</button>
+          <span id="vis-count" style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;">0 selecionadas</span>
+        </div>
+        <div class="check-list" id="vis-list"></div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <label>O projeto técnico de visita foi construído e aprovado pela SED/MS?</label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="proj-visita" value="Sim"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="proj-visita" value="Não"><span>Não</span></label>
+        </div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <label>Evidências da realização da visita técnica (PDF único, máx. 10 MB)</label>
+        <div class="upload-drop" onclick="document.getElementById('ev-visita-input').click()">
+          <div class="ico">📎</div>
+          <p>Clique para selecionar o arquivo PDF</p>
+          <small>Consolide todas as evidências em um único PDF antes de enviar</small>
+        </div>
+        <input type="file" id="ev-visita-input" accept=".pdf,image/*" style="display:none" onchange="handleUpload('ev-visita', this)" />
+        <div id="ev-visita-info" style="display:none" class="upload-info">
+          <span>📄</span><span id="ev-visita-name"></span>
+          <button onclick="clearUpload('ev-visita')">✕</button>
+        </div>
+      </div>
+
+      <!-- Insumos -->
+      <div class="divider" style="margin-top:22px">Insumos</div>
+      <div class="field full">
+        <label>Nesse bimestre, foram disponibilizados insumos? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="insumos" value="Sim"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="insumos" value="Não"><span>Não</span></label>
+          <label class="opt-item"><input type="radio" name="insumos" value="Parcialmente"><span>Parcialmente</span></label>
+        </div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <label>EEs que receberam insumos <span class="req">*</span></label>
+        <input type="text" class="check-search" placeholder="🔍 Buscar escola..." oninput="filterList('ins-list', this.value)" />
+        <div class="check-all-row">
+          <button class="check-all-btn" onclick="selectAll('ins-list', true)">Marcar todas</button>
+          <button class="check-all-btn" onclick="selectAll('ins-list', false)">Desmarcar todas</button>
+          <span id="ins-count" style="font-size:11px;color:var(--muted);margin-left:auto;align-self:center;">0 selecionadas</span>
+        </div>
+        <div class="check-list" id="ins-list"></div>
+      </div>
+      <div class="field full" style="margin-top:14px">
+        <label>Os insumos para aulas práticas estão adequados? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="insumos-adeq" value="SIM"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="insumos-adeq" value="NÃO"><span>Não</span></label>
+          <label class="opt-item"><input type="radio" name="insumos-adeq" value="PARCIALMENTE"><span>Parcialmente</span></label>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goTo(1)">← Voltar</button>
+        <button class="btn btn-primary" onclick="next(2)">Próximo: Documento Insumo →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ETAPA 3 — DOCUMENTO DE INSUMO
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-3">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📄</div>
+      <div><div class="card-title">Documento de Registro — Insumo</div><div class="card-sub">Anexe o comprovante do insumo disponibilizado</div></div>
+    </div>
+    <div class="card-body">
+      <div class="field full">
+        <label>Documento de registro relativo ao insumo disponibilizado <span class="req">*</span><br><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted)">Aceito: PDF, imagem ou documento. Máximo 10 MB.</span></label>
+        <div class="upload-drop" style="margin-top:8px" onclick="document.getElementById('doc-insumo-input').click()">
+          <div class="ico">📂</div>
+          <p>Clique para selecionar o arquivo</p>
+          <small>PDF · JPG · PNG · DOCX — máx. 10 MB</small>
+        </div>
+        <input type="file" id="doc-insumo-input" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none" onchange="handleUpload('doc-insumo', this)" />
+        <div id="doc-insumo-info" style="display:none" class="upload-info">
+          <span>📄</span><span id="doc-insumo-name"></span>
+          <button onclick="clearUpload('doc-insumo')">✕</button>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goTo(2)">← Voltar</button>
+        <button class="btn btn-primary" onclick="next(3)">Próximo: Avaliação →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ETAPA 4 — AVALIAÇÃO
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-4">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📊</div>
+      <div><div class="card-title">Avaliação</div><div class="card-sub">Metodologias e instrumentos de avaliação adotados</div></div>
+    </div>
+    <div class="card-body">
+
+      <div class="field full">
+        <label>A avaliação é realizada diariamente por meio de instrumentos como avaliações diagnósticas, formativas, comparativas e somativas? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="aval-diaria" value="SIM"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="aval-diaria" value="NÃO"><span>Não</span></label>
+          <label class="opt-item"><input type="radio" name="aval-diaria" value="Não posso responder, pois não conversei sobre esse assunto com o professor."><span>Não posso responder — não conversei sobre isso com o professor.</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>O modelo de avaliação realizado pelos professores parceiros é discutido com o supervisor? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="aval-sup" value="SIM"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="aval-sup" value="NÃO"><span>Não</span></label>
+          <label class="opt-item"><input type="radio" name="aval-sup" value="Não posso responder, pois não acompanho este processo."><span>Não posso responder — não acompanho este processo.</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>É adotada apenas prova como metodologia de avaliação? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="aval-prova" value="SIM"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="aval-prova" value="NÃO"><span>Não</span></label>
+          <label class="opt-item"><input type="radio" name="aval-prova" value="OUTRO"><span>Outro</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>A parte prática tem peso maior do que a avaliação teórica? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="aval-pratica-peso" value="Não tem peso."><span>Não tem peso — a prática não é avaliada com peso diferenciado.</span></label>
+          <label class="opt-item"><input type="radio" name="aval-pratica-peso" value="Tem peso quando é realizado a parte prática"><span>Tem peso, quando a parte prática é realizada.</span></label>
+          <label class="opt-item"><input type="radio" name="aval-pratica-peso" value="O professor não realiza parte prática, apenas ministra aulas teóricas."><span>O professor não realiza parte prática — apenas aulas teóricas.</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>Os estudantes têm clareza da metodologia de avaliação dos professores? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="aval-clareza" value="Não têm clareza."><span>Não têm clareza.</span></label>
+          <label class="opt-item"><input type="radio" name="aval-clareza" value="Tem clareza."><span>Têm clareza.</span></label>
+          <label class="opt-item"><input type="radio" name="aval-clareza" value="Não conversei com os estudantes sobre isso."><span>Não conversei com os estudantes sobre isso.</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>A instituição adota Ambiente Virtual de Aprendizagem (AVA) aos estudantes? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="ava" value="Sim, temos modelo implantado e em uso."><span>Sim — modelo implantado e em uso.</span></label>
+          <label class="opt-item"><input type="radio" name="ava" value="Temos modelo de AVA, no entanto, ainda não estamos utilizado."><span>Temos AVA, mas ainda não estamos utilizando.</span></label>
+          <label class="opt-item"><input type="radio" name="ava" value="Não temos modelo de AVA para disponibilização dos estudantes."><span>Não temos AVA disponível para os estudantes.</span></label>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goTo(3)">← Voltar</button>
+        <button class="btn btn-primary" onclick="next(4)">Próximo: Conformidade Legal →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ETAPA 5 — CONFORMIDADE LEGAL
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-5">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">⚖️</div>
+      <div><div class="card-title">Conformidade Legal</div><div class="card-sub">Contratação de professores e obrigações legais</div></div>
+    </div>
+    <div class="card-body">
+
+      <div class="field full">
+        <label>Todos os profissionais contratados atendem às exigências da Lei nº 6.473/2025 — certidões de antecedentes criminais para atuação com crianças e adolescentes? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="lei6473" value="Todos os profissionais entregaram a referida documentação"><span>Todos os profissionais entregaram a referida documentação.</span></label>
+          <label class="opt-item"><input type="radio" name="lei6473" value="Estamos em processo de contratação e estamos solicitando a certidão conforme a legislação;"><span>Estamos em processo de contratação — solicitando a certidão conforme a lei.</span></label>
+          <label class="opt-item"><input type="radio" name="lei6473" value="Não temos todos os arquivos."><span>Não temos todos os arquivos.</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>A instituição solicita, no ato da contratação, comprovação de capacitação em primeiros socorros — Lei Lucas (Lei Federal nº 13.722/2018)? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="lei13722" value="Sim"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="lei13722" value="Não"><span>Não</span></label>
+          <label class="opt-item"><input type="radio" name="lei13722" value="Estamos em organização"><span>Estamos em organização</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>A instituição orienta e fiscaliza o cumprimento da Lei Federal nº 15.100/2025 — restrição do uso de celulares durante as aulas, intervalos e recreios? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="lei15100" value="Sim"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="lei15100" value="Não"><span>Não</span></label>
+        </div>
+      </div>
+
+      <div class="field full" style="margin-top:16px">
+        <label>A instituição possui orientação formal quanto à vedação do compartilhamento de imagens de estudantes em redes sociais pessoais — Lei nº 15.211/2025 (ECA Digital)? <span class="req">*</span></label>
+        <div class="opt-group">
+          <label class="opt-item"><input type="radio" name="lei15211" value="Sim"><span>Sim</span></label>
+          <label class="opt-item"><input type="radio" name="lei15211" value="Não"><span>Não</span></label>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goTo(4)">← Voltar</button>
+        <button class="btn btn-primary" onclick="next(5)">Revisar e Enviar →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     ETAPA 6 — REVISAR E ENVIAR
+════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-6">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">✅</div>
+      <div><div class="card-title">Revisar e Enviar</div><div class="card-sub">Confira os dados antes de salvar no Google Sheets</div></div>
+    </div>
+    <div class="card-body">
+      <div id="review-content"></div>
+      <div class="btn-row" style="margin-top:24px">
+        <button class="btn btn-ghost" onclick="goTo(5)">← Voltar e editar</button>
+        <button class="btn btn-submit" id="btn-submit" onclick="submitAll()">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M13 7.5l-5.5 5.5-5.5-5.5M7.5 2v11" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Enviar Monitoramento
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+<div id="toast"></div>
+
+<script>
+// ── CONFIGURAÇÃO ─────────────────────────────────────────────────────────────
+// Cole aqui a URL gerada ao publicar o Code.gs como Web App no Apps Script
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxPG-GbUm1s5dGYynH7XohbipbQ7EUqwrcY-NjDVznMA2tllkNvhqYAhPCPGo2FZ2aoBQ/exec";
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Lista completa de EEs (igual ao formulário original da SED)
+const ESCOLAS = [
+  "CEEP MARCIO ELIAS NERY",
+  "CENTRO DE EDUCAÇÃO PROFISSIONAL DE AQUIDAUANA GERALDO AFONSO GARCIA FERREIRA",
+  "CENTRO DE EDUCAÇÃO PROFISSIONAL EZEQUIEL FERREIRA LIMA",
+  "CENTRO DE EDUCAÇÃO PROFISSIONAL GERALDO AFONSO GARCIA FERREIRA - EXTENSÃO SALA ADA MOREIRA DE BARROS",
+  "CENTRO ESTADUAL DE EDUCAÇÃO PROFISSIONAL ARLINDO NECKEL",
+  "CENTRO ESTADUAL DE EDUCAÇÃO PROFISSIONAL HÉRCULES MAYMONE",
+  "CENTRO ESTADUAL DE EDUCAÇÃO PROFISSIONAL PE.JOÃO GREINER",
+  "CENTRO ESTADUAL DE EDUCAÇÃO PROFISSIONAL PROFª MARIA DE LOURDES WIDAL ROMA",
+  "CENTRO ESTADUAL DE EDUCAÇÃO PROFISSIONAL PROFESSORA EVANILDE COSTA DA SILVA",
+  "EE 11 DE OUTUBRO","EE 13 DE MAIO","EE 2 DE SETEMBRO","EE 26 DE AGOSTO","EE 31 DE MARÇO",
+  "EE 4 DE ABRIL","EE 8 DE MAIO","EE 8 DE MAIO - EXTENSÃO ASSENTAMENTO NOSSA SENHORA AUXILIADORA",
+  "EE ADÊ MARQUES","EE ADILSON ALVES DA SILVA","EE AFONSO FRANCISCO XAVIER TRANNIN","EE AFONSO PENA",
+  "EE ÁLVARO MARTINS DOS SANTOS","EE ÁLVARO MARTINS DOS SANTOS - EXTENSÃO ALDEIA RANCHO DO JACARÉ",
+  "EE ALZIRO LOPES","EE AMANDO DE OLIVEIRA","EE AMÉLIO DE CARVALHO BAÍS",
+  "EE ANA MARIA DE SOUZA","EE ANA MARIA DE SOUZA-EXTENSÃO ASSENTAMENTO SÃO JOAQUIM",
+  "EE ANGELINA JAIME TEBET","EE ANTÔNIA DA SILVEIRA CAPILÉ","EE ANTÔNIO COELHO",
+  "EE ANTÔNIO FERNANDES","EE ANTÔNIO JOÃO RIBEIRO","EE ANTÔNIO NOGUEIRA DA FONSECA",
+  "EE ANTÔNIO NOGUEIRA DA FONSECA - EXTENSÃO JAMIC","EE ANTÔNIO VALADARES",
+  "EE ANTÔNIO VALADARES - EXTENSÃO PATAGONIA","EE ANTÔNIO VICENTE AZAMBUJA",
+  "EE ARACILDA CÍCERO CORRÊA DA COSTA","EE ARACY EUDOCIAK","EE ARAL MOREIRA",
+  "EE ARLINDO DE ANDRADE GOMES","EE AUGUSTO KRUG NETTO","EE AUSTRILIO CAPILÉ CASTRO",
+  "EE BARÃO DO RIO BRANCO","EE BARÃO DO RIO BRANCO -EXT.ALDEIA PANAMBI LAGOA RICA",
+  "EE BLANCHE DOS SANTOS PEREIRA","EE BOM JESUS","EE BONIFÁCIO CAMARGO GOMES",
+  "EE BONIFÁCIO CAMARGO GOMES - EXTENSÃO DISTRITO ÁGUAS DE MIRANDA",
+  "EE CAMBARAI","EE CAMILO BONFIM","EE CÂNDIDO MARIANO","EE CARLOS DE CASTRO BRASIL",
+  "EE CARMELITA CANALE REBUÁ","EE CASTELO BRANCO","EE CEL. JOSÉ ALVES RIBEIRO",
+  "EE CEL. JUVÊNCIO","EE CEL. PEDRO JOSÉ RUFINO","EE CEL. SAPUCAIA",
+  "EE CÍVICO-MILITAR CORONEL LIMA DE FIGUEIREDO","EE CÍVICO-MILITAR MARÇAL DE SOUZA TUPÃ-Y",
+  "EE CÍVICO-MILITAR MARIA CORRÊA DIAS","EE CÍVICO-MILITAR PROF. ALBERTO ELPÍDIO FERREIRA DIAS (PROF.TITO)",
+  "EE COMANDANTE MAURÍCIO COUTINHO DUTRA","EE CORONEL RAMIRO NORONHA",
+  "EE DELFINA NOGUEIRA DE SOUZA","EE DELFINA NOGUEIRA DE SOUZA - EXTENSÃO SALA COMENDADOR LUIZ MENEGHEL ASSENTAMENTO PANA",
+  "EE DEP. CARLOS SOUZA MEDEIROS","EE DEP. FERNANDO C. CAPIBERIBE SALDANHA",
+  "EE DOM AQUINO CORRÊA","EE DOM BOSCO","EE DONA CONSUELO MULLER","EE DONA ROSA PEDROSSIAN",
+  "EE DORCELINA DE OLIVEIRA FOLADOR","EE DR. ARNALDO ESTEVÃO DE FIGUEIREDO",
+  "EE DR. ARTHUR DE VASCONCELLOS DIAS","EE DR. FERNANDO CORRÊA DA COSTA",
+  "EE DR. GABRIEL VANDONI DE BARROS","EE DR. JOÃO LEITE DE BARROS",
+  "EE DR. JOÃO LEITE DE BARROS - EXTENSÃO SALA PAIOLZINHO ASSENTAMENTO PAIOLZINHO",
+  "EE DR. JOÃO PONCE DE ARRUDA","EE DR. JOAQUIM MURTINHO","EE DR. MARTINHO MARQUES",
+  "EE DR. MIGUEL MARCONDES ARMANDO","EE DR. RUBENS DE CASTRO PINTO",
+  "EE DR. RUBENS DE CASTRO PINTO - EXTENSÃO SALA ALTO CARACOL",
+  "EE EDSON BEZERRA","EE EDUARDO BATISTA AMORIM","EE EDUARDO PEREZ","EE EDWARDS CORRÊA E SOUZA",
+  "EE ELDORADO","EE ENEIL VARGAS","EE ERNESTO SOLON BORGES","EE ESTER SILVA",
+  "EE ETALÍVIO PEREIRA MARTINS","EE EUFRÁZIA FAGUNDES MARQUES","EE EURICO GASPAR DUTRA",
+  "EE FELIPE ORRO","EE FERNANDO CORRÊA","EE FERNANDO CORRÊA DA COSTA",
+  "EE FLORIANO VIEGAS MACHADO","EE FREI JOÃO DAMASCENO","EE FREI VITAL DE GARIBALDI",
+  "EE GAL. MALAN","EE GUIMARÃES ROSA","EE HERMELINA BARBOSA LEAL",
+  "EE INDÍGENA CACIQUE TIMÓTEO","EE INDÍGENA CACIQUE VICENTE DE ALMEIDA",
+  "EE INDÍGENA DE EM ANGELINA VICENTE","EE INDÍGENA DE EM PASCOAL LEITE DIAS",
+  "EE INDÍGENA DE EM PASTOR REGINALDO MIGUEL - HOYENÓ O","EE INDÍGENA DE EM YVY POTY",
+  "EE INDÍGENA GUILHERMINA DA SILVA","EE INDÍGENA INTERCULTURAL GUATEKA - MARÇAL DE SOUZA",
+  "EE INDÍGENA JASY RENDY","EE INDÍGENA JASY RENDY -EXTENSÃO ALDEIA JAGUAPIRÉ",
+  "EE INDÍGENA MBO EROY GUARANI KAIOWÁ","EE INDÍGENA MBO´EROY GUARANI KAIOWÁ - EXTENSÃO SALA COROA SAGRADA",
+  "EE INDÍGENA NATIVIDADE ALCANTARA MARQUES","EE INDIGENA PROF. ATANASIO ALVES",
+  "EE JAN ANTONIN BATA","EE JAPORÃ","EE JAPORÃ - EXTENSÃO POVOADO JACAREI",
+  "EE JOÃO BAPTISTA PEREIRA","EE JOÃO BREMBATTI CALVOSO","EE JOÃO CARLOS FLORES",
+  "EE JOÃO DANTAS FILGUEIRAS","EE JOÃO PEDRO PEDROSSIAN","EE JOÃO PONCE DE ARRUDA",
+  "EE JOÃO VITORINO MARQUES","EE JOAQUIM GONÇALVES LEDO","EE JOAQUIM MALAQUIAS DA SILVA",
+  "EE JOAQUIM MÁRIO BONFIM","EE JOAQUIM MÁRIO BONFIM -EXTENSÃO SALA ASSENTAMENTO SUMATRA",
+  "EE JOAQUIM MÁRIO BONFIM -EXTENSÃO SALA MORRARIA DO SUL","EE JOAQUIM MURTINHO",
+  "EE JOAQUIM VAZ DE OLIVEIRA","EE JONAS BELARMINO DA SILVA","EE JOSÉ ALVES QUITO",
+  "EE JOSÉ ALVES RIBEIRO","EE JOSÉ ANTÔNIO PEREIRA","EE JOSÉ BARBOSA RODRIGUES",
+  "EE JOSÉ BONIFÁCIO","EE JOSÉ FERREIRA BARBOSA","EE JOSÉ FERREIRA LIMA",
+  "EE JOSÉ FERREIRA LIMA - EXTENSÃO ASSENTAMENTO MUTUM","EE JOSÉ GARCIA LEAL",
+  "EE JOSÉ MAMEDE DE AQUINO","EE JOSÉ SERAFIM RIBEIRO","EE JÚLIA GONÇALVES PASSARINHO",
+  "EE JURACY ALVES CARDOSO","EE LAGOA BONITA","EE LEME DO PRADO",
+  "EE LEME DO PRADO - EXTENSÃO SALA MARQUÊS DE TAMANDARÉ","EE LEONTINO ALVES DE OLIVEIRA",
+  "EE LINO VILLACHA","EE LÚCIA MARTINS COELHO","EE LUIS VAZ DE CAMÕES",
+  "EE LUISA VIDAL BORGES DANIEL","EE LUIZ DA COSTA FALCÃO","EE LUIZ LOPES DE CARVALHO",
+  "EE LUIZ SOARES ANDRADE","EE MAESTRO FREDERICO LIEBERMANN","EE MAESTRO HEITOR VILLA LOBOS",
+  "EE MAL. CASTELO BRANCO","EE MAL. RONDON","EE MANOEL BONIFÁCIO NUNES DA CUNHA",
+  "EE MANOEL DA COSTA LIMA","EE MANOEL DA COSTA LIMA -EXTENSÃO SALA SANTA CLARA",
+  "EE MANOEL FERREIRA DE LIMA","EE MANOEL GARCIA LEAL","EE MANOEL GUILHERME DOS SANTOS",
+  "EE MARCÍLIO AUGUSTO PINTO","EE MARIA CONSTANÇA BARROS MACHADO",
+  "EE MARIA CORRÊA DIAS - EXTENSÃO MONJOLINHO","EE MARIA CORRÊA DIAS - EXTENSÃO SÃO MANOEL",
+  "EE MARIA DA GLÓRIA MUZZI FERREIRA","EE MARIA ELIZA BOCAYUVA CORRÊA DA COSTA",
+  "EE MARIA HELENA ALBANEZE","EE MARIA JOSÉ","EE MARIA LEITE",
+  "EE MENODORA FIALHO DE FIGUEIREDO","EE MIGUEL SUTIL","EE MIN. JOÃO PAULO DOS REIS VELOSO",
+  "EE NATHÉRCIA POMPEO DOS SANTOS","EE NOVA ITAMARATI","EE OCTACÍLIO FAUSTINO DA SILVA",
+  "EE ODETE IGNÊZ RESSTEL VILLAS BÔAS","EE OLINDA CONCEIÇÃO TEIXEIRA BACHA","EE OLIVIA PAULA",
+  "EE PADRE CONSTANTINO DE MONTE","EE PADRE FRANCO DELPIANO","EE PADRE JOÃO TOMES",
+  "EE PADRE JOSÉ DANIEL","EE PADRE JOSÉ DE ANCHIETA","EE PADRE JOSÉ SCAMPINI",
+  "EE PADRE MÁRIO BLANDINO","EE PADRE NUNES","EE PADROEIRA DO BRASIL",
+  "EE PANTALEÃO COELHO XAVIER","EE PAULO EDUARDO DE SOUZA FIRMO",
+  "EE PAULO EDUARDO DE SOUZA FIRMO - EXTENSÃO ASSENTAMENTO SÃO PEDRO",
+  "EE PAULO EDUARDO DE SOUZA FIRMO - EXTENSÃO GIBÓIA","EE PEDRO AFONSO PEREIRA GOLDONI",
+  "EE PEDRO AFONSO PEREIRA GOLDONI -EXTENSÃO SALA GRAÇA DE DEUS","EE PEDRO MENDES FONTOURA",
+  "EE PERI MARTINS","EE PÓLO FRANCISCO CÂNDIDO DE REZENDE",
+  "EE PÓLO FRANCISCO CÂNDIDO DE REZENDE - EXTENSÃO ISAURO BENTO",
+  "EE PÓLO FRANCISCO CÂNDIDO DE REZENDE - EXTENSÃO SANTA LUZIA",
+  "EE PORTO VILMA","EE PRES. MÉDICI","EE PRES. TANCREDO NEVES","EE PRES. VARGAS",
+  "EE PRINCESA IZABEL","EE PROF. ALÍCIO ARAÚJO","EE PROF. ANTÔNIO PINTO PEREIRA",
+  "EE PROF. ANTÔNIO SALÚSTIO AREIAS","EE PROF. BRAZ SINIGÁGLIA","EE PROF. CARLOS PEREIRA DA SILVA",
+  "EE PROF. CELSO MULLER DO AMARAL","EE PROF. CLETO DE MORAES COSTA",
+  "EE PROF. EMYGDIO CAMPOS WIDAL","EE PROF. EZEQUIEL BALBINO","EE PROF. JOÃO MAGIANO PINTO",
+  "EE PROF. JOÃO PEREIRA VALIM","EE PROF. JOAQUIM ALFREDO SOARES VIANNA",
+  "EE PROF. JOSÉ EDSON DOMINGOS DOS SANTOS",
+  "EE PROF. JOSÉ EDSON DOMINGOS DOS SANTOS - EXTENSÃO CABECEIRA DO APA",
+  "EE PROF. JOSÉ JUAREZ RIBEIRO DE OLIVEIRA","EE PROF. JOSÉ PEREIRA LINS",
+  "EE PROF. LADISLAU DEÁK FILHO","EE PROF. LUIZ ALBERTO ABRAHAM","EE PROF. LUIZ CARLOS SAMPAIO",
+  "EE PROF. SILVIO OLIVEIRA DOS SANTOS","EE PROF. ULISSES SERRA",
+  "EE PROFª MARIA AUGUSTA COSTA RAMOS","EE PROFA MARIA AUGUSTA COSTA RAMOS",
+  "EE PROFª ROMILDA COSTA CARNEIRO","EE PROFª. ADA TEIXEIRA DOS SANTOS PEREIRA",
+  "EE PROFª. ALICE NUNES ZAMPIERE","EE PROFª. BERNADETE SANTOS LEITE",
+  "EE PROFª. BRASILINA FERRAZ MANTERO","EE PROFª. CATARINA DE ABREU",
+  "EE PROFª. CLARINDA MENDES DE AQUINO","EE PROFª. CLEUZA APARECIDA V. GALHARDO",
+  "EE PROFª. CLEUZA TEODORO","EE PROFª. CREUZA APARECIDA DELLA COLETA",
+  "EE PROFª. DÓRIS MENDES TRINDADE","EE PROFª. DÓRIS MENDES TRINDADE - EXTENSÃO PANTANEIRA",
+  "EE PROFª. ÉLIA FRANÇA CARDOSO","EE PROFª. EUFROSINA PINTO",
+  "EE PROFª. FÁTIMA GAIOTTO SAMPAIO","EE PROFª. FAUSTA GARCIA BUENO",
+  "EE PROFª. FAUSTA GARCIA BUENO - EXTENSÃO BARÃO DO RIO BRANCO",
+  "EE PROFª. FLAVINA MARIA DA SILVA","EE PROFª. FLORIANA LOPES",
+  "EE PROFª. GENI MARQUES MAGALHÃES","EE PROFª. IOLANDA ALLY","EE PROFª. IZAURA HIGA",
+  "EE PROFª. LIGIA TEREZINHA MARTINS","EE PROFª. MARIA DE LOURDES TOLEDO AREIAS",
+  "EE PROFª. MARIA RITA DE CÁSSIA PONTES TEIXEIRA","EE PROFª. MARLY RUSSO RODRIGUES",
+  "EE PROFª. NEYDER SUELLY COSTA VIEIRA","EE PROFª. TERTULINA MARTINS DE OLIVEIRA",
+  "EE PROFª. THEREZA NORONHA DE CARVALHO","EE PROFª. VÂNIA MEDEIROS LOPES",
+  "EE PROFª. VERA GUIMARÃES LOUREIRO","EE PROFª. ZÉLIA QUEVEDO CHAVES",
+  "EE RAMONA DA SILVA PEDROSO","EE REYNALDO MASSI - EXTENSÃO SALA BENEDITA FIGUEIRÓ DE OLIVEIRA",
+  "EE RITA ANGELINA BARBOSA SILVEIRA","EE ROBERTO SCAFF","EE RODRIGUES ALVES",
+  "EE ROMALINO ALVES DE ALBRES","EE RUI BARBOSA","EE SALOMÉ DE MELO ROCHA",
+  "EE SANTIAGO BENITES","EE SANTOS DUMONT","EE SÃO GABRIEL",
+  "EE SÃO GABRIEL - EXTENSÃO SALA FUNPESG","EE SÃO JOSÉ","EE SCILA MÉDICI",
+  "EE SEBASTIÃO SANTANA DE OLIVEIRA","EE SEN. FILINTO MULLER","EE SEN. FILINTO MÜLLER",
+  "EE SEN. SALDANHA DERZI","EE SIDRÔNIO ANTUNES DE ANDRADE","EE SILO VARGAS BATISTA",
+  "EE TEOTÔNIO VILELA","EE THOMAZ BARBOSA RANGEL","EE UIRAPURU","EE VER. KENDI NAKAI",
+  "EE VEREADOR MOACIR DJALMA BARROS","EE VERGELINO MATEUS DE OLIVEIRA",
+  "EE VESPASIANO MARTINS","EE VILA BRASIL","EE VILMAR VIEIRA MATOS",
+  "EE VINÍCIUS DE MORAES","EE VIRIATO BANDEIRA","EE WALDEMIR BARROS DA SILVA",
+  "EE WEIMAR TORRES","EE WLADISLAU GARCIA GOMES","EE ZUMBI DOS PALMARES",
+  "EE. DR. JOSÉ MANOEL FONTANILLAS FRAGELLI","ESCOLA ESTADUAL VEREADOR CRISTÓVÃO SILVEIRA"
+];
+
+// IDs de listas de EEs para popular automaticamente
+const EE_LISTS = ["ees-list","mat-list","prat-list","vis-list","ins-list"];
+const EE_COUNTS = {
+  "ees-list":  "ees-count",
+  "mat-list":  "mat-count",
+  "prat-list": "prat-count",
+  "vis-list":  "vis-count",
+  "ins-list":  "ins-count"
+};
+
+// Uploads em memória
+const uploads = {};
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  EE_LISTS.forEach(id => buildCheckList(id, ESCOLAS));
+
+  // Sincronizar checkboxes entre as listas de EEs via evento
+  EE_LISTS.forEach(listId => {
+    document.getElementById(listId).addEventListener("change", () => {
+      updateCount(listId);
+    });
+  });
+});
+
+// ── LISTAS CHECKBOX ───────────────────────────────────────────────────────────
+function buildCheckList(containerId, items) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = items.map(item => `
+    <label class="check-item">
+      <input type="checkbox" value="${item}" onchange="updateCount('${containerId}')">
+      ${item}
+    </label>`).join("");
+}
+
+function filterList(containerId, query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll(`#${containerId} .check-item`).forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+function selectAll(containerId, checked) {
+  document.querySelectorAll(`#${containerId} .check-item input`).forEach(cb => {
+    // Só marca/desmarca os visíveis
+    if (cb.closest(".check-item").style.display !== "none") cb.checked = checked;
+  });
+  updateCount(containerId);
+}
+
+function updateCount(containerId) {
+  const countId = EE_COUNTS[containerId];
+  if (!countId) return;
+  const n = document.querySelectorAll(`#${containerId} input:checked`).length;
+  document.getElementById(countId).textContent = n + " selecionada" + (n !== 1 ? "s" : "");
+}
+
+function getChecked(containerId) {
+  return Array.from(document.querySelectorAll(`#${containerId} input:checked`)).map(c => c.value);
+}
+
+// ── UPLOAD ────────────────────────────────────────────────────────────────────
+function handleUpload(key, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) {
+    showToast("⚠️ Arquivo maior que 10 MB. Reduza o tamanho.", "error");
+    input.value = "";
+    return;
+  }
+  uploads[key] = file;
+  document.getElementById(key + "-name").textContent = file.name;
+  document.getElementById(key + "-info").style.display = "flex";
+}
+
+function clearUpload(key) {
+  delete uploads[key];
+  const inputId = key + "-input";
+  document.getElementById(inputId).value = "";
+  document.getElementById(key + "-info").style.display = "none";
+}
+
+async function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result.split(",")[1]);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+// ── HERO UPDATE ───────────────────────────────────────────────────────────────
+function updateHero() {
+  const inst   = document.getElementById("i-inst").value;
+  const modelo = document.querySelector('input[name="modelo"]:checked');
+  document.getElementById("hero-inst").textContent   = inst ? "🏭 " + inst.split("-")[0].trim() : "🏭 SENAI-MS";
+  document.getElementById("hero-modelo").textContent = modelo ? "📄 " + (modelo.value.includes("PROVERT") ? "PROVERT" : "IFP") : "📄 —";
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────────────────────────
+function goTo(step) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-" + step).classList.add("active");
+  document.querySelectorAll(".step-btn").forEach((b, i) => {
+    b.classList.remove("active");
+    if (i + 1 < step) b.classList.add("done"); else b.classList.remove("done");
+  });
+  document.getElementById("nav-" + step).classList.add("active");
+  document.getElementById("hero-step").textContent = "📋 Etapa " + step + " de 6";
+  document.getElementById("prog").style.width = (step / 6 * 100) + "%";
+  if (step === 6) buildReview();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function next(currentStep) {
+  if (!validateStep(currentStep)) return;
+  goTo(currentStep + 1);
+}
+
+// ── VALIDAÇÃO ─────────────────────────────────────────────────────────────────
+function validateStep(step) {
+  if (step === 1) {
+    if (!document.getElementById("i-inst").value) {
+      showToast("⚠️ Selecione a instituição.", "error"); return false;
+    }
+    if (!document.querySelector('input[name="modelo"]:checked')) {
+      showToast("⚠️ Selecione o modelo de oferta.", "error"); return false;
+    }
+    if (!document.getElementById("i-whats").value.trim()) {
+      showToast("⚠️ Informe o WhatsApp do coordenador.", "error"); return false;
+    }
+    if (!document.getElementById("i-coord").value.trim()) {
+      showToast("⚠️ Informe o nome do coordenador.", "error"); return false;
+    }
+    if (!document.getElementById("i-email-focal").value.trim()) {
+      showToast("⚠️ Informe o e-mail do ponto focal.", "error"); return false;
+    }
+    if (!document.getElementById("i-cidade").value) {
+      showToast("⚠️ Selecione a cidade.", "error"); return false;
+    }
+    if (getChecked("ees-list").length === 0) {
+      showToast("⚠️ Selecione ao menos uma Unidade Escolar.", "error"); return false;
+    }
+  }
+  if (step === 2) {
+    if (!document.querySelector('input[name="material"]:checked')) {
+      showToast("⚠️ Responda sobre material didático.", "error"); return false;
+    }
+    if (!document.querySelector('input[name="praticas"]:checked')) {
+      showToast("⚠️ Responda sobre atividades práticas.", "error"); return false;
+    }
+    if (!document.querySelector('input[name="visita"]:checked')) {
+      showToast("⚠️ Responda sobre visita técnica.", "error"); return false;
+    }
+    if (!document.querySelector('input[name="insumos"]:checked')) {
+      showToast("⚠️ Responda sobre insumos.", "error"); return false;
+    }
+    if (!document.querySelector('input[name="insumos-adeq"]:checked')) {
+      showToast("⚠️ Responda sobre adequação dos insumos.", "error"); return false;
+    }
+  }
+  if (step === 4) {
+    const radios = ["aval-diaria","aval-sup","aval-prova","aval-pratica-peso","aval-clareza","ava"];
+    for (const name of radios) {
+      if (!document.querySelector(`input[name="${name}"]:checked`)) {
+        showToast("⚠️ Responda todas as perguntas de Avaliação.", "error"); return false;
+      }
+    }
+  }
+  if (step === 5) {
+    const radios = ["lei6473","lei13722","lei15100","lei15211"];
+    for (const name of radios) {
+      if (!document.querySelector(`input[name="${name}"]:checked`)) {
+        showToast("⚠️ Responda todas as perguntas de Conformidade Legal.", "error"); return false;
+      }
+    }
+  }
+  return true;
+}
+
+// ── REVIEW ────────────────────────────────────────────────────────────────────
+function buildReview() {
+  const rv = (label, val) =>
+    `<div class="review-row"><span class="review-label">${label}</span><span class="review-val">${val || "—"}</span></div>`;
+
+  const radio = name => {
+    const el = document.querySelector(`input[name="${name}"]:checked`);
+    return el ? el.value : "—";
+  };
+
+  const eesId = (id) => {
+    const sel = getChecked(id);
+    return sel.length ? sel.length + " escola(s) selecionada(s)" : "Nenhuma";
+  };
+
+  document.getElementById("review-content").innerHTML = `
+    <div class="review-section">
+      <h3>1 · Identificação</h3>
+      ${rv("Instituição", document.getElementById("i-inst").value)}
+      ${rv("Modelo de oferta", radio("modelo"))}
+      ${rv("Coordenador pedagógico", document.getElementById("i-coord").value)}
+      ${rv("WhatsApp", document.getElementById("i-whats").value)}
+      ${rv("E-mail ponto focal", document.getElementById("i-email-focal").value)}
+      ${rv("Cidade", document.getElementById("i-cidade").value)}
+      ${rv("Unidades escolares", eesId("ees-list"))}
+    </div>
+    <div class="review-section">
+      <h3>2 · Execução Pedagógica</h3>
+      ${rv("Material didático", radio("material"))}
+      ${rv("EEs com material", eesId("mat-list"))}
+      ${rv("Atividades práticas", radio("praticas"))}
+      ${rv("EEs com práticas", eesId("prat-list"))}
+      ${rv("Visita técnica", radio("visita"))}
+      ${rv("EEs com visita", eesId("vis-list"))}
+      ${rv("Projeto visita aprovado SED", radio("proj-visita"))}
+      ${rv("Evidência visita (arquivo)", uploads["ev-visita"] ? uploads["ev-visita"].name : "Não anexado")}
+      ${rv("Insumos disponibilizados", radio("insumos"))}
+      ${rv("EEs com insumos", eesId("ins-list"))}
+      ${rv("Insumos adequados", radio("insumos-adeq"))}
+    </div>
+    <div class="review-section">
+      <h3>3 · Documento de Insumo</h3>
+      ${rv("Documento insumo (arquivo)", uploads["doc-insumo"] ? uploads["doc-insumo"].name : "Não anexado")}
+    </div>
+    <div class="review-section">
+      <h3>4 · Avaliação</h3>
+      ${rv("Avaliação diária", radio("aval-diaria"))}
+      ${rv("Modelo discutido com supervisor", radio("aval-sup"))}
+      ${rv("Apenas prova", radio("aval-prova"))}
+      ${rv("Peso da parte prática", radio("aval-pratica-peso"))}
+      ${rv("Estudantes com clareza", radio("aval-clareza"))}
+      ${rv("Adota AVA", radio("ava"))}
+    </div>
+    <div class="review-section">
+      <h3>5 · Conformidade Legal</h3>
+      ${rv("Lei 6.473/2025 — certidões criminais", radio("lei6473"))}
+      ${rv("Lei Lucas 13.722/2018 — primeiros socorros", radio("lei13722"))}
+      ${rv("Lei 15.100/2025 — restrição celulares", radio("lei15100"))}
+      ${rv("Lei 15.211/2025 — ECA Digital", radio("lei15211"))}
+    </div>`;
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────────────────────
+async function submitAll() {
+  const btn = document.getElementById("btn-submit");
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Preparando envio...';
+
+  try {
+    const radio = name => {
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : "";
+    };
+
+    btn.innerHTML = '<div class="spin"></div> Convertendo arquivos...';
+    const evVisitaB64   = uploads["ev-visita"]   ? await fileToBase64(uploads["ev-visita"])   : null;
+    const docInsumoB64  = uploads["doc-insumo"]  ? await fileToBase64(uploads["doc-insumo"])  : null;
+
+    btn.innerHTML = '<div class="spin"></div> Enviando dados...';
+
+    const payload = {
+      identificacao: {
+        email:            document.getElementById("i-email-focal").value.trim(),
+        instituicao:      document.getElementById("i-inst").value,
+        modeloOferta:     radio("modelo"),
+        whatsapp:         document.getElementById("i-whats").value.trim(),
+        nomeCoordenador:  document.getElementById("i-coord").value.trim(),
+        emailPontoFocal:  document.getElementById("i-email-focal").value.trim(),
+        cidade:           document.getElementById("i-cidade").value,
+        unidadesEscolares: getChecked("ees-list")
+      },
+      pedagogico: {
+        materialDidatico:          radio("material"),
+        eesComMaterial:            getChecked("mat-list"),
+        atividadesPraticas:        radio("praticas"),
+        eesComPraticas:            getChecked("prat-list"),
+        visitaTecnica:             radio("visita"),
+        eesComVisita:              getChecked("vis-list"),
+        projetoVisitaAprovado:     radio("proj-visita"),
+        evidenciaVisitaBase64:     evVisitaB64,
+        evidenciaVisitaNome:       uploads["ev-visita"] ? uploads["ev-visita"].name : null,
+        insumosDisponibilizados:   radio("insumos"),
+        eesComInsumos:             getChecked("ins-list"),
+        insumosAdequados:          radio("insumos-adeq")
+      },
+      insumo: {
+        docBase64: docInsumoB64,
+        docNome:   uploads["doc-insumo"] ? uploads["doc-insumo"].name : null
+      },
+      avaliacao: {
+        avaliacaoDiaria:           radio("aval-diaria"),
+        modeloDiscutidoSupervisor: radio("aval-sup"),
+        apenasProva:               radio("aval-prova"),
+        praticaPesoMaior:          radio("aval-pratica-peso"),
+        estudantesClareza:         radio("aval-clareza"),
+        adotaAva:                  radio("ava")
+      },
+      conformidade: {
+        lei6473:  radio("lei6473"),
+        lei13722: radio("lei13722"),
+        lei15100: radio("lei15100"),
+        lei15211: radio("lei15211")
+      }
+    };
+
+    const res  = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
+    const json = await res.json();
+
+    if (json.status === "ok") {
+      showToast("✅ Monitoramento enviado! Protocolo: " + json.protocolo, "success");
+      setTimeout(() => location.reload(), 3500);
+    } else {
+      throw new Error(json.message || "Erro desconhecido");
+    }
+
+  } catch (err) {
+    console.error(err);
+    showToast("❌ Erro ao enviar. Verifique a URL do Apps Script no arquivo.", "error");
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M13 7.5l-5.5 5.5-5.5-5.5M7.5 2v11" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Enviar Monitoramento`;
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "show " + (type || "");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = "", 3800);
+}
+</script>
+</body>
+</html>
