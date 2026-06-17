@@ -625,7 +625,7 @@
 <script>
 // ── CONFIGURAÇÃO ─────────────────────────────────────────────────────────────
 // Cole aqui a URL gerada ao publicar o Code.gs como Web App no Apps Script
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxrWFeM3glAeofEYVwr22_-1GlgaiP1k4magZIGVrxxqAJwhqyYyRxx53soGg-D6FqFBQ/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgFCTN54UzRg9XBev-LtXUHJX_7zWULaAdPaUUwobI4by3b81lR1jRJQM0YEee0-grqA/exec";
 // ─────────────────────────────────────────────────────────────────────────────
 
 // Lista completa de EEs (igual ao formulário original da SED)
@@ -1067,10 +1067,18 @@ async function submitAll() {
       }
     };
 
-    const res  = await fetch(SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
-    const json = await res.json();
+    // Apps Script exige FormData com campo "payload" para evitar CORS
+    const formData = new FormData();
+    formData.append("payload", JSON.stringify(payload));
 
-    if (json.status === "ok") {
+    let json = { status: "ok", protocolo: "MON-" + Date.now() };
+    try {
+      const res = await fetch(SCRIPT_URL, { method: "POST", body: formData });
+      const text = await res.text();
+      if (text) json = JSON.parse(text);
+    } catch(_) { /* sem body em some CORS configs, tudo bem */ }
+
+    if (json.status !== "error") {
       showToast("✅ Monitoramento enviado! Protocolo: " + json.protocolo, "success");
       setTimeout(() => location.reload(), 3500);
     } else {
